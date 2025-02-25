@@ -6,3 +6,26 @@ onmessage = (event) => {
     const randomNumber = Math.floor(Math.random() * 45) + 1;
     postMessage(randomNumber);    
 }
+
+let lastActiveTime = Date.now();
+let isWindowActive = true;
+let idleInterval = null;
+
+onmessage = (event) => {
+  if (event.data === "window-hidden") {
+    isWindowActive = false
+    lastActiveTime = Date.now()
+    
+    idleInterval = setInterval(() => {
+      const idleTime = Math.floor((Date.now() - lastActiveTime) / 1000);
+      console.log("idleTime", lastActiveTime)
+      postMessage({ type: "idle-time", value: idleTime });
+    }, 1000)
+    
+  } else if (event.data === "window-visible") {
+    isWindowActive = true;
+    if (idleInterval) clearInterval(idleInterval)
+    console.log("idleInterval", idleInterval)
+    postMessage({ type: "reset-idle" })
+  }
+}
